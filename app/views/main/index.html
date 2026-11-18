@@ -3,6 +3,33 @@
 {% block title %}Inicio{% endblock %}
 
 {% block content %}
-<h1>Bienvenido</h1>
-<p>Estructura MVC con Flask.</p>
+<h1 class="page-title">Bienvenido</h1>
+<p class="page-subtitle">Estructura MVC con Flask — panel de ejemplo.</p>
+
+<div class="cards">
+    <div class="card">
+        <h3>Usuarios</h3>
+        <div class="value">0</div>
+        <div class="hint">Registros en la base</div>
+    </div>
+    <div class="card">
+        <h3>Plantillas</h3>
+        <div class="value">2</div>
+        <div class="hint">Vistas disponibles</div>
+    </div>
+    <div class="card">
+        <h3>Blueprints</h3>
+        <div class="value">2</div>
+        <div class="hint">main y user</div>
+    </div>
+</div>
+
+<div class="panel">
+    <h2>Estructura del proyecto</h2>
+    <p>
+        Los datos se manejan en <strong>models/</strong>, la lógica de rutas en
+        <strong>controllers/</strong> y el HTML en <strong>views/</strong>.
+        Este panel es la vista de inicio.
+    </p>
+</div>
 {% endblock %}

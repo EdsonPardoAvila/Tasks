@@ -4,14 +4,45 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Mi App Flask{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
-    <nav>
-        <a href="{{ url_for('main.index') }}">Inicio</a>
-        <a href="{{ url_for('user.list_users') }}">Usuarios</a>
-    </nav>
-    <main>
+    <header class="navbar">
+        <a class="brand" href="{{ url_for('main.index') }}">
+            <span class="dot"></span>
+            Mi App
+        </a>
+        <div class="navbar-actions">
+            <div class="user-chip">
+                <div class="avatar">EP</div>
+                <span>Edson Pardo</span>
+            </div>
+            <button class="menu-toggle" aria-label="Abrir menú">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+    </header>
+
+    <aside class="sidebar">
+        <p class="section-title">Menú</p>
+        <a href="{{ url_for('main.index') }}">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+            Inicio
+        </a>
+        <a href="{{ url_for('user.list_users') }}">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            Usuarios
+        </a>
+    </aside>
+
+    <div class="overlay"></div>
+
+    <main class="main">
         {% block content %}{% endblock %}
     </main>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
 </body>
 </html>
