@@ -138,6 +138,53 @@ Se sustituyó el `window.confirm()` nativo por un modal de confirmación propio:
 
 ---
 
+## 8. Estilo flat/minimalista con desenfoque en modales
+
+**Fecha:** 18/11/2026
+
+Se aplicó un estilo flat/minimalista a los modales con desenfoque moderado del fondo:
+
+- **Overlay:** tinte más suave `rgba(0,0,0,0.25)` + `backdrop-filter: blur(5px)` (con prefijo `-webkit-` para Safari).
+- **Modal flat:** sombra reducida (`0 8px 24px rgba(0,0,0,0.08)`), borde de 1px `var(--border)` en lugar de profundidad por sombra.
+- **Animación plana:** fade de opacidad sin desplazamiento.
+- Aplica a ambos modales (formulario y confirmación); el overlay del sidebar no cambió.
+
+**Archivos:** `app/views/static/css/style.css`, `historial.md`.
+
+---
+
+## 9. Paleta pastel multicolor en botones
+
+**Fecha:** 18/11/2026
+
+Se aplicaron tonos pastel a los botones y se registró una paleta multicolor como variables del diseño (estilo flat coherente con el cambio anterior):
+
+### Paleta pastel (variables en `:root`)
+
+| Color | Fondo | Texto | Hover |
+|---|---|---|---|
+| Azul | `#dbeafe` | `#1d4ed8` | `#bfdbfe` |
+| Verde | `#dcfce7` | `#15803d` | `#bbf7d0` |
+| Ámbar | `#fef3c7` | `#b45309` | `#fde68a` |
+| Rosa | `#ffe4e6` | `#be123c` | `#fecdd3` |
+| Violeta | `#ede9fe` | `#6d28d9` | `#ddd6fe` |
+
+### Aplicación en botones
+
+| Clase | Uso | Pastel |
+|---|---|---|
+| `.btn-primary` | "+ Nuevo usuario", "Crear/Guardar" | Azul |
+| `.btn-danger` | icono Eliminar (tabla) | Rosa |
+| `.btn-danger-solid` | confirmación "Eliminar" | Rosa marcado (`#fecdd3` / `#9f1239`, hover `#fda4af`) |
+| `.btn` | "Cancelar" | Neutro (sin cambio) |
+| `.btn-success` | utilitaria (nueva) | Verde |
+| `.btn-warning` | utilitaria (nueva) | Ámbar |
+| `.btn-info` | utilitaria (nueva) | Violeta |
+
+**Archivos:** `app/views/static/css/style.css`, `historial.md`.
+
+---
+
 ## Estado actual del proyecto
 
 ```
