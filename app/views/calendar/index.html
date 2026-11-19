@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+
+{% block title %}Calendario{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Calendario</h1>
+        <p class="page-subtitle">Vista mensual de eventos y tareas.</p>
+    </div>
+    <button type="button" class="btn btn-primary" id="btn-new-event">+ Nuevo evento</button>
+</div>
+
+<div class="panel calendar-panel">
+    <div id="calendar" data-events-url="{{ url_for('calendar.api_events') }}"></div>
+</div>
+
+<div class="modal-overlay" id="event-modal" hidden
+     data-create-url="{{ url_for('calendar.create') }}">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="event-modal-title">
+        <div class="modal-header">
+            <h2 id="event-modal-title">Nuevo evento</h2>
+            <button type="button" class="modal-close" aria-label="Cerrar" data-event-modal-close>&times;</button>
+        </div>
+        <form id="event-form" method="post" action="">
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="event-title">Título</label>
+                    <input type="text" id="event-title" name="title" required maxlength="120"
+                           placeholder="ej. Reunión de equipo">
+                </div>
+                <div class="form-group">
+                    <label for="event-description">Descripción</label>
+                    <textarea id="event-description" name="description" maxlength="2000"
+                              placeholder="Detalles opcionales..."></textarea>
+                </div>
+                <div class="form-group form-period">
+                    <div class="period-header">
+                        <span class="field-label">Periodo</span>
+                        <label class="form-check">
+                            <input type="checkbox" id="event-all-day" name="all_day">
+                            Todo el día
+                        </label>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="event-start">Inicio</label>
+                            <input type="datetime-local" id="event-start" name="start" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="event-end">Fin (opcional)</label>
+                            <input type="datetime-local" id="event-end" name="end">
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Color</label>
+                    <div class="color-swatches">
+                        <label style="background:#dbeafe" title="Azul">
+                            <input type="radio" name="color" value="#dbeafe" checked>
+                        </label>
+                        <label style="background:#dcfce7" title="Verde">
+                            <input type="radio" name="color" value="#dcfce7">
+                        </label>
+                        <label style="background:#fef3c7" title="Ámbar">
+                            <input type="radio" name="color" value="#fef3c7">
+                        </label>
+                        <label style="background:#ffe4e6" title="Rosa">
+                            <input type="radio" name="color" value="#ffe4e6">
+                        </label>
+                        <label style="background:#ede9fe" title="Violeta">
+                            <input type="radio" name="color" value="#ede9fe">
+                        </label>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn" data-event-modal-close>Cancelar</button>
+                <button type="submit" class="btn btn-primary" id="event-modal-submit">Crear evento</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="event-dropdown" id="event-dropdown" hidden role="menu" aria-label="Acciones del evento">
+    <button type="button" role="menuitem" data-action="view">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+        Ver más
+    </button>
+    <button type="button" role="menuitem" data-action="edit">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
+        Editar
+    </button>
+    <button type="button" role="menuitem" data-action="delete" class="danger">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+        Eliminar
+    </button>
+</div>
+
+<div class="modal-overlay" id="event-detail-modal" hidden>
+    <div class="modal modal-detail" role="dialog" aria-modal="true" aria-labelledby="event-detail-title">
+        <div class="modal-header">
+            <h2 id="event-detail-title">Detalle del evento</h2>
+            <button type="button" class="modal-close" aria-label="Cerrar" data-detail-close>&times;</button>
+        </div>
+        <div class="modal-body">
+            <h3 class="detail-title" id="detail-name"></h3>
+            <p class="detail-period" id="detail-period"></p>
+            <div class="detail-description">
+                <span class="field-label">Descripción</span>
+                <p id="detail-description"></p>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn" data-detail-close>Cerrar</button>
+        </div>
+    </div>
+</div>
+
+<form id="event-delete-form" method="post" action="" data-confirm="¿Eliminar este evento?" hidden></form>
+
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.21/index.global.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@fullcalendar/core@6.1.21/locales/es.global.min.js"></script>
+<script src="{{ url_for('static', filename='js/calendar.js') }}"></script>
+{% endblock %}

@@ -185,6 +185,134 @@ Se aplicaron tonos pastel a los botones y se registró una paleta multicolor com
 
 ---
 
+## 10. Módulo calendario
+
+**Fecha:** 19/11/2026
+
+Se creó el módulo calendario con vista mensual y modelo `Event` listo para futuros eventos y tareas:
+
+- **Modelo** `Event` (`app/models/event.py`, tabla `events`): title, description, start, end, all_day, color, created_at. Sin UI de creación aún.
+- **Blueprint** `calendar` (`app/controllers/calendar.py`, prefijo `/calendar`):
+  - `GET /calendar/` — vista del calendario.
+  - `GET /calendar/api/events` — JSON `[]` (feed preparado para FullCalendar).
+- **Vista** `calendar/index.html`: FullCalendar v6 por CDN (`fullcalendar@6.1.21` + locale `es`), vistas mes/semana/día, toolbar en español, `firstDay: 1` (lunes).
+- **Sidebar**: enlace "Calendario" en `base.html`.
+- **CSS**: estilos `#calendar` / `.fc` con variables del tema (borde, botones pastel azul, hoy resaltado).
+- **Blueprint registrado** en `create_app()`.
+- **3 pruebas nuevas**: página `/calendar/`, API `events` vacía, enlace en sidebar (10 en total).
+- Modelo `Task` (separado) queda para una entrega futura, junto con el CRUD de eventos.
+
+**Archivos:** `app/models/event.py`, `app/models/__init__.py`, `app/controllers/calendar.py`, `app/views/calendar/index.html`, `app/__init__.py`, `app/views/base.html`, `app/views/static/css/style.css`, `tests/test_app.py`, `historial.md`.
+
+---
+
+## 11. Paleta del calendario y CRUD de eventos
+
+**Fecha:** 19/11/2026
+
+Se ajustó FullCalendar a la paleta pastel del proyecto y se implementó el CRUD completo de eventos:
+
+### Paleta
+- Variables CSS de `#calendar .fc` mapeadas a los tokens del tema (`--border`, `--accent-soft`, pastel azul para botones/eventos, rosa para el indicador "ahora").
+- Eventos con fondo pastel + `textColor` oscuro (mapa `PALETTE` en el controller) para mantener contraste legible.
+- Estilos flat: celdas de hoy con `--accent-soft`, cabecera con `--bg`, eventos con radio 6px, fin de semana atenuado.
+- Swatches de color en el modal (5 colores pastel) y soporte de `textarea`/`select` en `.form-group`.
+
+### CRUD de eventos
+| Método | Ruta | Acción |
+|---|---|---|
+| GET | `/calendar/api/events` | Feed JSON de FullCalendar desde la BD |
+| POST | `/calendar/events/` | Crear (validación + PRG) |
+| POST | `/calendar/events/<id>` | Actualizar |
+| POST | `/calendar/events/<id>/delete` | Eliminar (confirm modal) |
+
+- Validación: título y inicio obligatorios; fin ≥ inicio; color fuera de paleta → default `#dbeafe`.
+- `all_day`: normaliza a medianoche; el feed usa fechas `YYYY-MM-DD` con `end` exclusivo de FullCalendar.
+- **Modal** `#event-modal` en `calendar/index.html`: título, descripción, todo el día (alterna `date`/`datetime-local`), inicio/fin, swatches de color.
+- **`calendar.js`**: init FullCalendar, `dateClick` → modal de creación (09:00–10:00), `eventClick` → edición con botón Eliminar (`data-confirm`), botón "+ Nuevo evento".
+- **10 pruebas nuevas** (19 en total): crear, validación, actualizar, eliminar, 404, formato `all_day`, color inválido, modal en página.
+
+**Archivos:** `app/controllers/calendar.py`, `app/views/calendar/index.html`, `app/views/static/js/calendar.js`, `app/views/static/css/style.css`, `tests/test_app.py`, `historial.md`.
+
+---
+
+## 12. Mejora de diseño del modal de eventos
+
+**Fecha:** 19/11/2026
+
+Se rediseñó el modal (también aplica al de usuarios) con foco en scroll, tamaño y responsividad:
+
+- **Estructura flex:** `.modal` es columna con `max-height: min(92vh, 720px)`; header y footer fijos, `.modal-body` con `overflow-y: auto` y scrollbar sutil del tema.
+- **Tamaño:** `max-width` de 440px → 480px; en móvil `100%` / `95vh` y overlay con menos padding.
+- **Organización del form:** sección "Periodo" con cabecera (etiqueta + checkbox "Todo el día") e Inicio/Fin en grid de 2 columnas (`.form-period` / `.period-header` / `.form-row`); colores al final; en ≤768px las fechas se apilan.
+- **Footer responsivo:** `flex-wrap`, "Eliminar" a la izquierda (`btn-delete-left`); en ≤480px botones en columna full-width.
+- **Tests:** 19 OK (sin cambios en lógica).
+
+**Archivos:** `app/views/static/css/style.css`, `app/views/calendar/index.html`, `historial.md`.
+
+---
+
+## 13. Dropdown de acciones del evento
+
+**Fecha:** 19/11/2026
+
+Se separó el flujo de acciones del evento del modal de crear/editar:
+
+- **Crear:** el modal de form ya **no** tiene botón "Eliminar" (no hay nada que borrar).
+- **Clic en un evento:** ya no abre edición directa; muestra un **dropdown** (`#event-dropdown`) junto al cursor con:
+  - **Ver más** → modal de solo lectura (`#event-detail-modal`): título, periodo formateado (`Intl` es) y descripción.
+  - **Editar** → modal form existente en modo edición (solo Cancelar | Guardar).
+  - **Eliminar** → reutiliza `#confirm-modal` de `base.html` vía `#event-delete-form` (`data-confirm`).
+- Dropdown: cerrar con clic fuera, `ESC` o scroll; posicionado sin salirse del viewport; ítem danger en rosa pastel.
+- **Tests:** 19 OK (página exige dropdown y detalle, y `assertNotIn` de `event-delete-btn`).
+
+**Archivos:** `app/views/calendar/index.html`, `app/views/static/js/calendar.js`, `app/views/static/css/style.css`, `tests/test_app.py`, `historial.md`.
+
+---
+
+## 14. Fix dropdown y mejora visual del calendario
+
+**Fecha:** 19/11/2026
+
+### Bug fix: dropdown al clickear un evento
+- **Causa:** el mismo click burbujeaba al listener de `document` y cerraba el dropdown recién abierto (parpadeo / no aparecía).
+- **Fix:** `stopPropagation()` + `preventDefault()` en `eventClick`; guardia temporal de 150 ms en el handler de `document`; no cerrar si el click fue dentro de `.fc-event`.
+
+### Más eventos por día
+- `dayMaxEvents: 3`: hasta 3 eventos por celda y link nativo **"+N más"** (popover de FullCalendar).
+
+### Diseño visual
+- Toolbar: título 1.2rem semibold, botones pastel con focus ring, grupos de vistas con radio limpio.
+- Cabeceras de día: uppercase, letter-spacing, muted.
+- Celdas: hover sutil en número, hoy resaltado, días de otro mes atenuados.
+- Eventos: radio 6px, font-weight 500, hover con leve elevación; estilo del link "+N más" y del popover.
+- Vista semana/día: slots, eje de horas y "ahora" (rosa) con la paleta del tema.
+- Lista: bordes/radius del tema.
+
+### Responsive
+- ≤768px: toolbar en 2 filas (título centrado arriba), botones/celdas/eventos más compactos.
+- ≤480px: se oculta el botón "Día" del toolbar; celdas y eventos aún más compactos.
+
+**Archivos:** `app/views/static/js/calendar.js`, `app/views/static/css/style.css`, `historial.md`.
+
+---
+
+## 15. Días festivos de Colombia
+
+**Fecha:** 19/11/2026
+
+Se agregaron los días festivos de Colombia al calendario, con estilo propio:
+
+- **`app/holidays.py`:** `easter_sunday()` (Meeus/Jones/Butcher) + `colombian_holidays(year)` → 17 festivos/año (12 fijos + Jueves/Viernes Santo + Ascensión, Corpus Christi y Sagrado Corazón trasladados al lunes). `holidays_as_events()` los convierte en eventos de FullCalendar.
+- **API** `GET /calendar/api/events`: lee `start`/`end` de FullCalendar, genera festivos del rango de años y los mezcla con los eventos de BD (ordenados por fecha).
+- **Estilo:** neutro slate (`#f1f5f9` / `#475569`) + borde izquierdo `#94a3b8` y clase `.fc-holiday` — distinto de los 5 colores de eventos, dentro del tema flat.
+- **Clic en festivo:** abre el modal de detalle en solo lectura (sin dropdown Editar/Eliminar).
+- **Tests:** 22 en total (festivos 2026, presencia en API, no rompen eventos de usuario, feed "vacío" = sin eventos de usuario pero con festivos).
+
+**Archivos:** `app/holidays.py`, `app/controllers/calendar.py`, `app/views/static/js/calendar.js`, `app/views/static/css/style.css`, `tests/test_app.py`, `historial.md`.
+
+---
+
 ## Estado actual del proyecto
 
 ```
@@ -193,10 +321,11 @@ port/
 │   ├── __init__.py          # Factory + static_folder + db.create_all()
 │   ├── config.py            # dev / test / prod
 │   ├── extensions.py        # db, migrate
-│   ├── models/              # User
-│   ├── controllers/         # main (CRUD rutas), user (CRUD completo)
-│   └── views/               # base.html, main/, user/, static/css, static/js
-├── tests/                   # 7 pruebas
+│   ├── holidays.py          # festivos Colombia + Pascua
+│   ├── models/              # User, Event
+│   ├── controllers/         # main, user (CRUD), calendar (CRUD + festivos)
+│   └── views/               # base.html, main/, user/, calendar/, static/css, static/js
+├── tests/                   # 22 pruebas
 ├── run.py
 ├── requirements.txt
 ├── .gitignore
@@ -217,4 +346,4 @@ python run.py
 python -m unittest discover tests
 ```
 
-**Servidor:** http://127.0.0.1:5000 — rutas: `/`, `/users/`, `/users/new`.
+**Servidor:** http://127.0.0.1:5000 — rutas: `/`, `/users/`, `/calendar/`.

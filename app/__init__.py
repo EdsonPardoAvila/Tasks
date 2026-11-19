@@ -14,10 +14,11 @@ def create_app(config_name=None):
     db.init_app(app)
     migrate.init_app(app, db)
 
-    from app.controllers import main, user
+    from app.controllers import calendar, main, user
 
     app.register_blueprint(main.bp)
     app.register_blueprint(user.bp)
+    app.register_blueprint(calendar.bp)
 
     with app.app_context():
         db.create_all()
