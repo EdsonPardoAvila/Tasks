@@ -1,6 +1,6 @@
 # Proyecto Flask MVC
 
-Estructura de carpetas en Python.
+Estructura de carpetas en Python        .
 
 ## Estructura
 

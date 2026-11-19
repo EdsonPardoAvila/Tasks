@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+
+{% block title %}Usuarios{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Usuarios</h1>
+        <p class="page-subtitle">Gestión de usuarios del sistema.</p>
+    </div>
+    <button type="button" class="btn btn-primary" id="btn-new-user">+ Nuevo usuario</button>
+</div>
+
+{% if users %}
+<table class="table">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Username</th>
+            <th>Email</th>
+            <th class="col-actions">Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for u in users %}
+        <tr>
+            <td>{{ u.id }}</td>
+            <td>{{ u.username }}</td>
+            <td>{{ u.email }}</td>
+            <td class="col-actions">
+                <button type="button" class="btn btn-icon btn-edit" title="Editar"
+                        aria-label="Editar a {{ u.username }}"
+                        data-id="{{ u.id }}" data-username="{{ u.username }}" data-email="{{ u.email }}">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
+                </button>
+                <form class="inline" method="post" action="{{ url_for('user.delete', user_id=u.id) }}"
+                      data-confirm="¿Eliminar a {{ u.username }}?">
+                    <button type="submit" class="btn btn-icon btn-danger" title="Eliminar"
+                            aria-label="Eliminar a {{ u.username }}">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>
+                    </button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<div class="empty-state">
+    <p>No hay usuarios registrados.</p>
+</div>
+{% endif %}
+
+<div class="modal-overlay" id="user-modal" hidden
+     data-create-url="{{ url_for('user.create') }}">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+        <div class="modal-header">
+            <h2 id="modal-title">Nuevo usuario</h2>
+            <button type="button" class="modal-close" aria-label="Cerrar" data-modal-close>&times;</button>
+        </div>
+        <form id="user-form" method="post" action="">
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" name="username" required maxlength="64"
+                           placeholder="ej. jperez">
+                </div>
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" required maxlength="120"
+                           placeholder="ej. correo@ejemplo.com">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn" data-modal-close>Cancelar</button>
+                <button type="submit" class="btn btn-primary" id="modal-submit">Crear usuario</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

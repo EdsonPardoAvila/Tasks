@@ -5,12 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Mi App Flask{% endblock %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.css">
 </head>
 <body>
     <header class="navbar">
         <a class="brand" href="{{ url_for('main.index') }}">
             <span class="dot"></span>
-            Mi App
+            To Do App
         </a>
         <div class="navbar-actions">
             <div class="user-chip">
@@ -39,10 +40,32 @@
 
     <div class="overlay"></div>
 
+    <div class="modal-overlay" id="confirm-modal" hidden>
+        <div class="modal modal-confirm" role="alertdialog" aria-modal="true" aria-labelledby="confirm-title">
+            <div class="modal-header">
+                <h2 id="confirm-title">Confirmar</h2>
+                <button type="button" class="modal-close" aria-label="Cerrar" data-confirm-close>&times;</button>
+            </div>
+            <div class="modal-body">
+                <p id="confirm-message"></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn" data-confirm-close>Cancelar</button>
+                <button type="button" class="btn btn-danger-solid" id="confirm-accept">Eliminar</button>
+            </div>
+        </div>
+    </div>
+
     <main class="main">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        <script id="flash-messages" type="application/json">{{ messages|tojson }}</script>
+        {% endif %}
+        {% endwith %}
         {% block content %}{% endblock %}
     </main>
 
+    <script src="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.js"></script>
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
 </body>
 </html>
